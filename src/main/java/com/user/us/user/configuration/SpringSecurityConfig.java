@@ -1,74 +1,98 @@
 package com.user.us.user.configuration;
 
-//import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.user.us.user.provider.AppAuthProvider;
+import com.user.us.user.service.AuthService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-//import org.springframework.security.oauth2.jwt.JwtDecoder;
-//import org.springframework.security.oauth2.jwt.JwtEncoder;
-//import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-//import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
-import javax.crypto.spec.SecretKeySpec;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.*;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 
 @Configuration
+@EnableWebSecurity
 public class SpringSecurityConfig {
+    @Autowired
+    AuthService authService;
 
-    public SpringSecurityConfig() throws IOException {
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-    return http.csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-            .httpBasic(Customizer.withDefaults())
-            .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
-            .build();
-    }
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-    @Bean
-    public UserDetailsService users() {
-        UserDetails user = User.builder()
-                .username("user")
-                .password(passwordEncoder()
-                        .encode("password"))
-                .roles("USER").build();
-        return new InMemoryUserDetailsManager(user);
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfiguration) throws Exception {
+        return authConfiguration.getAuthenticationManager();
     }
 
     @Bean
-    public String jwtKey() throws IOException {
-        try {
-            Path path = Paths.get("src/main/resources/256key.txt");
-            return Files.readString(path).trim();
-        } catch (IOException e) {
-            throw new RuntimeException("Erreur lors de la lecture du fichier 256key.txt", e);
-        }
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        //use to allow direct login call without hidden value csfr (Cross Site Request Forgery) needed
+//        http.csrf().disable();
+        http.csrf(csrf->csrf.disable());
+        http.authenticationProvider(getProvider())
+                .exceptionHandling(ex ->ex.authenticationEntryPoint(new Http403ForbiddenEntryPoint()))
+                .formLogin(flogin->flogin
+                        .loginProcessingUrl("/login")
+                        .successHandler(successHandler())
+                        .failureHandler(failureHandler())
+                        .permitAll())
+                .logout(lout->lout.logoutUrl("/logout")
+                        .permitAll()
+                        .invalidateHttpSession(true))
+                .authorizeHttpRequests(auth->
+                        auth.requestMatchers("/heroes").authenticated()
+                                .anyRequest().authenticated());
+
+        return http.build();
     }
 
-//    String jwtKey = this.jwtKey();
-//
-//    @Bean
-//    public JwtDecoder jwtDecoder() throws IOException {
-//        SecretKeySpec secretKey = new SecretKeySpec(this.jwtKey.getBytes(), 0, this.jwtKey.getBytes().length,"RSA");
-//        return NimbusJwtDecoder.withSecretKey(secretKey).macAlgorithm(MacAlgorithm.HS256).build();
-//    }
+    @Bean
+    public AuthenticationProvider getProvider() {
+        AppAuthProvider provider = new AppAuthProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(authService);
+        return provider;
+    }
+
+
+    //Use to redefine return in case of good or bad auth
+    private AuthenticationFailureHandler failureHandler() {
+        System.out.println("failure");
+        return new SimpleUrlAuthenticationFailureHandler() {
+            public void onAuthenticationFailure(HttpServletRequest request,
+                                                HttpServletResponse response, AuthenticationException exception)
+                    throws IOException, ServletException {
+                response.setContentType("text/html;charset=UTF-8");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed. Wrong username or password or both");
+            }
+        };
+    }
+
+
+    private AuthenticationSuccessHandler successHandler() {
+        return new SimpleUrlAuthenticationSuccessHandler() {
+            public void onAuthenticationSuccess(HttpServletRequest request,
+                                                HttpServletResponse response, Authentication authentication)
+                    throws IOException, ServletException {
+                response.setContentType("text/html;charset=UTF-8");
+                response.getWriter().println("LoginSuccessful");
+            }
+        };
+    }
 
 }

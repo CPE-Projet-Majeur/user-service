@@ -12,6 +12,17 @@ public class UserDTO {
     private String surName;
     private String email;
 
+    // Exemple security gitlab à voir
+    public Integer role;
+    public Integer getRole() {
+        return role;
+    }
+
+    public void setRole(final Integer role) {
+        this.role = role;
+    }
+    // Fin exemple
+
     public UserDTO() {
     }
 
@@ -79,6 +90,14 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public String toString() {
+        return "UserDto [username=" +
+                login +
+                ", role=" +
+                role + "]";
     }
 
 }
