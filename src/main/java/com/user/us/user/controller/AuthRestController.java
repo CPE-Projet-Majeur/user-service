@@ -20,10 +20,11 @@ public class AuthRestController {
     }
 
     @RequestMapping(method= RequestMethod.POST,value="/auth")
-    private Integer login(@RequestBody AuthDTO authDto) {
+    private String login(@RequestBody AuthDTO authDto) {
         List<UserModel> uList = authService.getUserByLoginPwd(authDto.getUsername(),authDto.getPassword());
         if( uList.size() > 0) {
-            return uList.get(0).getId();
+        	System.out.println("{\"userId\":"+uList.get(0).getId()+", \"token\": test}");
+        	return "{\"userId\":" + uList.get(0).getId() + ", \"token\": \"test\"}";
         }
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Authentification Failed",null);
 

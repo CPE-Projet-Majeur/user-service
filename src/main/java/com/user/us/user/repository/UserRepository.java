@@ -9,7 +9,7 @@ import com.user.us.user.model.UserModel;
 
 public interface UserRepository extends CrudRepository<UserModel, Integer> {
 
-    List<UserModel> findByLoginAndPwd(String login,String pwd);
+    List<UserModel> findByLoginAndPassword(String login,String password);
 
 }
 

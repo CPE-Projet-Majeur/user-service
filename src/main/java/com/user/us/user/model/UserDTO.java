@@ -6,79 +6,78 @@ import java.util.Set;
 public class UserDTO {
     private Integer id;
     private String login;
-    private String pwd;
-    private float account;
+    private String password;
     private String lastName;
-    private String surName;
+    private String firstName;
     private String email;
-
+    private String house;
+    
     public UserDTO() {
     }
 
     public UserDTO(UserModel user) {
         this.id = user.getId();
         this.login = user.getLogin();
-        this.pwd = user.getPwd();
-        this.account = user.getAccount();
+        this.password = user.getPassword();
         this.lastName = user.getLastName();
-        this.surName = user.getSurName();
+        this.firstName = user.getFirstName();
         this.email = user.getEmail();
+        this.house = user.getHouse();
     }
 
-    public Integer getId() {
-        return id;
-    }
+	public Integer getId() {
+		return id;
+	}
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+	public String getLogin() {
+		return login;
+	}
 
-    public String getLogin() {
-        return login;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public void setLogin(String login) {
-        this.login = login;
-    }
+	public String getLastName() {
+		return lastName;
+	}
 
-    public String getPwd() {
-        return pwd;
-    }
+	public String getFirstName() {
+		return firstName;
+	}
 
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public float getAccount() {
-        return account;
-    }
+	public String getHouse() {
+		return house;
+	}
 
-    public void setAccount(float account) {
-        this.account = account;
-    }
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
-    public String getLastName() {
-        return lastName;
-    }
+	public void setLogin(String login) {
+		this.login = login;
+	}
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public String getSurName() {
-        return surName;
-    }
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 
-    public void setSurName(String surName) {
-        this.surName = surName;
-    }
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
+	public void setHouse(String house) {
+		this.house = house;
+	}
 }

@@ -21,92 +21,99 @@ public class UserModel implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String login;
-    private String pwd;
-    private float account;
+    private String password;
     private String lastName;
-    private String surName;
+    private String firstName;
     private String email;
+    private String house;
 
     public UserModel() {
         this.login = "";
-        this.pwd = "";
+        this.password = "";
         this.lastName="lastname_default";
-        this.surName="surname_default";
+        this.firstName="firstName_default";
         this.email="email_default";
+        this.house = "default_house";
     }
 
     public UserModel(String login, String pwd) {
         super();
         this.login = login;
-        this.pwd = pwd;
+        this.password = pwd;
         this.lastName="lastname_default";
-        this.surName="surname_default";
+        this.firstName="firstName_default";
         this.email="email_default";
+        this.house = "default_house";
     }
 
     public UserModel(UserDTO user) {
         this.id=user.getId();
         this.login=user.getLogin();
-        this.pwd=user.getPwd();
-        this.account=user.getAccount();
+        this.password=user.getPassword();
+        this.house=user.getHouse();
         this.lastName=user.getLastName();
-        this.surName=user.getSurName();
+        this.firstName=user.getFirstName();
         this.email=user.getEmail();
     }
 
-    public Integer getId() {
-        return id;
-    }
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+	public Integer getId() {
+		return id;
+	}
 
-    public String getLogin() {
-        return login;
-    }
+	public String getLogin() {
+		return login;
+	}
 
-    public void setLogin(String login) {
-        this.login = login;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public String getPwd() {
-        return pwd;
-    }
+	public String getLastName() {
+		return lastName;
+	}
 
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
-    }
+	public String getFirstName() {
+		return firstName;
+	}
 
-    public float getAccount() {
-        return account;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setAccount(float account) {
-        this.account = account;
-    }
+	public String getHouse() {
+		return house;
+	}
 
-    public String getLastName() {
-        return lastName;
-    }
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+	public void setLogin(String login) {
+		this.login = login;
+	}
 
-    public String getSurName() {
-        return surName;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public void setSurName(String surName) {
-        this.surName = surName;
-    }
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setHouse(String house) {
+		this.house = house;
+	}
+
 }

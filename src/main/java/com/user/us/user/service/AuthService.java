@@ -15,9 +15,9 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
-    public List<UserModel> getUserByLoginPwd(String login, String pwd) {
+    public List<UserModel> getUserByLoginPwd(String login, String password) {
         List<UserModel> ulist = null;
-        ulist = userRepository.findByLoginAndPwd(login, pwd);
+        ulist = userRepository.findByLoginAndPassword(login, password);
         return ulist;
     }
 }
