@@ -65,6 +65,7 @@ public class UserModel implements Serializable, UserDetails {
         this.lastName="lastname_default";
         this.firstName ="firstname_default";
         this.email="email_default";
+        this.house = "default_house";
     }
 
     public UserModel(String login, String pwd) {
@@ -100,49 +101,57 @@ public class UserModel implements Serializable, UserDetails {
 
     }
 
-    public Integer getId() {
-        return id;
-    }
+	public Integer getId() {
+		return id;
+	}
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+	public String getLogin() {
+		return login;
+	}
 
-    public String getLogin() {
-        return login;
-    }
 
-    public void setLogin(String login) {
-        this.login = login;
-    }
 
 //    public String getPassword() {
 //        return password;
 //    }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
-    public String getLastName() {
-        return lastName;
-    }
+	public String getLastName() {
+		return lastName;
+	}
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+
 
     public String getFirstName() {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
 
-    public String getEmail() {
-        return email;
-    }
+
+	public String getEmail() {
+		return email;
+	}
+
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public void setLogin(String login) {
+		this.login = login;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
     public void setEmail(String email) {
         this.email = email;

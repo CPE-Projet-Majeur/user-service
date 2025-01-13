@@ -22,9 +22,10 @@ public class AuthService implements UserDetailsService {
 //        this.userRepository = userRepository;
 //    }
 
-    public List<UserModel> getUserByLoginPwd(String login, String pwd) {
+    public List<UserModel> getUserByLoginPwd(String login, String password) {
         List<UserModel> ulist = null;
-        ulist = userRepository.findByLoginAndPassword(login, pwd);
+
+        ulist = userRepository.findByLoginAndPassword(login, password);
         return ulist;
     }
 

@@ -12,6 +12,7 @@ public interface UserRepository extends CrudRepository<UserModel, Integer> {
     List<UserModel> findByLoginAndPassword(String login,String password);
     Optional<UserModel> findByLogin(String username);
     void deleteByLogin(String username);
+
 }
 
 //public interface UserRepository extends JpaRepository<UserModel, Integer> {
