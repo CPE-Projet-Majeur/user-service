@@ -3,6 +3,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+### SHA256 key ###
+src/main/resources/256key.txt
 
 src/main/ressources/256key.txt
 
