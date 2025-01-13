@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+// Todo : not used anymore i think
+
 @CrossOrigin
 @RestController
 public class AuthRestController {

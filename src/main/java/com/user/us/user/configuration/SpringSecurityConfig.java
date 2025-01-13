@@ -1,36 +1,41 @@
 package com.user.us.user.configuration;
 
+import com.user.us.user.controller.jwt.JwtAuthEntryPoint;
+import com.user.us.user.controller.jwt.JwtRequestFilter;
 import com.user.us.user.provider.AppAuthProvider;
 import com.user.us.user.service.AuthService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.*;
-
-import java.io.IOException;
 
 
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfig {
-    @Autowired
-    AuthService authService;
+    private final AuthService authService;
+    private final JwtAuthEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtRequestFilter jwtRequestFilter;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public SpringSecurityConfig( AuthService authService,
+                           JwtAuthEntryPoint jwtAuthenticationEntryPoint,
+                           JwtRequestFilter jwtRequestFilter,
+                           PasswordEncoder passwordEncoder) {
+        this.authService=authService;
+        this.jwtAuthenticationEntryPoint=jwtAuthenticationEntryPoint;
+        this.jwtRequestFilter=jwtRequestFilter;
+        this.passwordEncoder=passwordEncoder;
+    }
 
 
     @Bean
@@ -43,20 +48,23 @@ public class SpringSecurityConfig {
 
         //use to allow direct login call without hidden value csfr (Cross Site Request Forgery) needed
 //        http.csrf().disable();
-        http.csrf(csrf->csrf.disable());
-        http.authenticationProvider(getProvider())
-                .exceptionHandling(ex ->ex.authenticationEntryPoint(new Http403ForbiddenEntryPoint()))
-                .formLogin(flogin->flogin
-                        .loginProcessingUrl("/login")
-                        .successHandler(successHandler())
-                        .failureHandler(failureHandler())
-                        .permitAll())
-                .logout(lout->lout.logoutUrl("/logout")
-                        .permitAll()
-                        .invalidateHttpSession(true))
-                .authorizeHttpRequests(auth->
-                        auth.requestMatchers("/heroes").authenticated()
-                                .anyRequest().authenticated());
+        http.csrf(csrf->csrf.disable())
+                .authenticationProvider(getProvider())
+                .exceptionHandling(ex ->ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .sessionManagement(sess->sess
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(
+                        auth-> auth
+                                .requestMatchers("/heroes").permitAll()
+                                .requestMatchers("/login").permitAll() // Se log
+                                .requestMatchers("/user").permitAll() // Ajouter un user (se créer soit même)
+                                .requestMatchers(HttpMethod.GET, "/user/**").permitAll() // Get un user specific
+                                .requestMatchers(HttpMethod.PUT, "/user/**").hasAuthority("ROLE_ADMIN") // update un user specific
+                                .requestMatchers(HttpMethod.PUT, "/user/{id}/role").hasAuthority("ROLE_ADMIN") // Ajouter un role à un user
+                                .requestMatchers(HttpMethod.PUT, "/user/role").hasAuthority("ROLE_ADMIN") // Ajouter un role à un user
+                                .requestMatchers("/users").permitAll() // Get les users
+                                .anyRequest().authenticated())
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -67,32 +75,6 @@ public class SpringSecurityConfig {
         provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(authService);
         return provider;
-    }
-
-
-    //Use to redefine return in case of good or bad auth
-    private AuthenticationFailureHandler failureHandler() {
-        System.out.println("failure");
-        return new SimpleUrlAuthenticationFailureHandler() {
-            public void onAuthenticationFailure(HttpServletRequest request,
-                                                HttpServletResponse response, AuthenticationException exception)
-                    throws IOException, ServletException {
-                response.setContentType("text/html;charset=UTF-8");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed. Wrong username or password or both");
-            }
-        };
-    }
-
-
-    private AuthenticationSuccessHandler successHandler() {
-        return new SimpleUrlAuthenticationSuccessHandler() {
-            public void onAuthenticationSuccess(HttpServletRequest request,
-                                                HttpServletResponse response, Authentication authentication)
-                    throws IOException, ServletException {
-                response.setContentType("text/html;charset=UTF-8");
-                response.getWriter().println("LoginSuccessful");
-            }
-        };
     }
 
 }

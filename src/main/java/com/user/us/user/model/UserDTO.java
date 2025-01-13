@@ -1,39 +1,81 @@
 package com.user.us.user.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserDTO {
     private Integer id;
     private String login;
-    private String pwd;
-    private float account;
+    private String password;
     private String lastName;
-    private String surName;
+    private String firstName;
     private String email;
+    private String house;
+    // Think if relevant or not to put it in dto
+    private float account;
+    private Integer wins;
+    private Integer defeats;
+    //Maybe will change
+    private List<String> roleList;
 
-    // Exemple security gitlab à voir
-    public Integer role;
-    public Integer getRole() {
-        return role;
-    }
-
-    public void setRole(final Integer role) {
-        this.role = role;
-    }
-    // Fin exemple
-
+    // Constructeur par défaut requis par Jackson
     public UserDTO() {
     }
 
     public UserDTO(UserModel user) {
         this.id = user.getId();
         this.login = user.getLogin();
-        this.pwd = user.getPwd();
-        this.account = user.getAccount();
+        this.password = user.getPassword();
         this.lastName = user.getLastName();
-        this.surName = user.getSurName();
+        this.firstName = user.getFirstName();
         this.email = user.getEmail();
+        this.house = user.getHouse();
+        this.defeats = user.getDefeats();
+        this.wins = user.getWins();
+        this.account = user.getAccount();
+        this.roleList = user.getRoleList().stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getRoleList() {
+        return roleList;
+    }
+
+    public void setRoleList(List<String> roleList) {
+        this.roleList = roleList;
+    }
+
+    public float getAccount() {
+        return account;
+    }
+
+    public void setAccount(float account) {
+        this.account = account;
+    }
+
+    public Integer getWins() {
+        return wins;
+    }
+
+    public void setWins(Integer wins) {
+        this.wins = wins;
+    }
+
+    public Integer getDefeats() {
+        return defeats;
+    }
+
+    public void setDefeats(Integer defeats) {
+        this.defeats = defeats;
+    }
+
+    public String getHouse() {
+        return house;
+    }
+
+    public void setHouse(String house) {
+        this.house = house;
     }
 
     public Integer getId() {
@@ -52,20 +94,12 @@ public class UserDTO {
         this.login = login;
     }
 
-    public String getPwd() {
-        return pwd;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
-    }
-
-    public float getAccount() {
-        return account;
-    }
-
-    public void setAccount(float account) {
-        this.account = account;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getLastName() {
@@ -76,12 +110,12 @@ public class UserDTO {
         this.lastName = lastName;
     }
 
-    public String getSurName() {
-        return surName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setSurName(String surName) {
-        this.surName = surName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getEmail() {
@@ -96,8 +130,12 @@ public class UserDTO {
     public String toString() {
         return "UserDto [username=" +
                 login +
-                ", role=" +
-                role + "]";
+                "]";
     }
-
+//    @Override
+//    public String toString() {
+//        return "UserDto [username=" +
+//                login +
+//                "Roles : "+getRoleList()+"]";
+//    }
 }

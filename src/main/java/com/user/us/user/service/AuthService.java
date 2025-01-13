@@ -24,7 +24,7 @@ public class AuthService implements UserDetailsService {
 
     public List<UserModel> getUserByLoginPwd(String login, String pwd) {
         List<UserModel> ulist = null;
-        ulist = userRepository.findByLoginAndPwd(login, pwd);
+        ulist = userRepository.findByLoginAndPassword(login, pwd);
         return ulist;
     }
 
