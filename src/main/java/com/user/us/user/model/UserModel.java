@@ -90,7 +90,7 @@ public class UserModel implements Serializable, UserDetails {
         this.lastName=user.getLastName();
         this.firstName =user.getFirstName();
         this.email=user.getEmail();
-        this.house = user.getHouse();
+        this.house = String.valueOf(user.getHouse());
 //        this.defeats = user.getDefeats();
 //        this.wins = user.getWins();
 //        this.account = user.getAccount();

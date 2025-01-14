@@ -57,6 +57,16 @@ public class UserRestController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User id:"+id+", not found",null);
     }
 
+    @RequestMapping(method=RequestMethod.GET,value="/user/login/{login}")
+    private UserDTO getUserByLogin(@PathVariable String login) {
+        Optional<UserModel> ruser;
+        ruser= userService.getUserNoPwdByLogin(login);
+        if(ruser.isPresent()) {
+            return DTOMapper.fromUserModelToUserDTO(ruser.get());
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User login"+login+", not found",null);
+    }
+
     @RequestMapping(method=RequestMethod.POST,value="/user")
     public UserDTO addUser(@RequestBody UserDTO user) {
         System.out.println(user);

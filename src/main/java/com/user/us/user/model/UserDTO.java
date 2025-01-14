@@ -10,7 +10,7 @@ public class UserDTO {
     private String lastName;
     private String firstName;
     private String email;
-    private String house;
+    private House house;
     // Think if relevant or not to put it in dto
     private float account;
     private Integer wins;
@@ -29,7 +29,7 @@ public class UserDTO {
         this.lastName = user.getLastName();
         this.firstName = user.getFirstName();
         this.email = user.getEmail();
-        this.house = user.getHouse();
+        this.house = House.valueOf(user.getHouse());
         this.defeats = user.getDefeats();
         this.wins = user.getWins();
         this.account = user.getAccount();
@@ -70,11 +70,11 @@ public class UserDTO {
         this.defeats = defeats;
     }
 
-    public String getHouse() {
+    public House getHouse() {
         return house;
     }
 
-    public void setHouse(String house) {
+    public void setHouse(House house) {
         this.house = house;
     }
 

@@ -1,14 +1,15 @@
 package com.user.us.user.errors;
 
+import com.user.us.user.common.tools.ReflectionUtils;
 import com.user.us.user.model.ErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.lang.reflect.Field;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,9 +35,58 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("Conflict", "Une contrainte d'intégrité a été violée : " + detailMessage));
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleInvalidFormatException(HttpMessageNotReadableException ex) {
+//        String fieldName = ex.getPath().get(0).getFieldName(); // Nom du champ problématique
+//        String fieldName = "House"; // Nom du champ problématique
+//
+//        System.out.println("cause : "+ex.getCause());
+//        String invalidValue = ex.getCause(); // Valeur invalide
+        // Utiliser ReflectionUtils pour accéder aux champs privés
+        Object targetType = ReflectionUtils.getPrivateField(ex, "_targetType");
+        Object value = ReflectionUtils.getPrivateField(ex, "_value");
+
+        String fieldName = targetType != null ? targetType.toString() : "null";
+        String invalidValue = value != null ? value.toString() : "null";
+        String expectedValues = "Slytherin, Gryffindor, Hufflepuff, Ravenclaw"; // Valeurs attendues
+        System.out.println("Fieldname : "+fieldName+"\nValue : "+ value);
+
+        String message = String.format("Valeur invalide pour le champ '%s': '%s'. Les valeurs acceptées sont : %s.",
+                fieldName, invalidValue, expectedValues);
+
+        ErrorResponse errorResponse = new ErrorResponse("Invalid Value", message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+//    // Gestion de l'exception InvalidFormatException
+//    // Ne fonctionne pas l'exception par jackson va directement dans internal error 500
+//    @ExceptionHandler(InvalidFormatException.class)
+//    public ResponseEntity<ErrorResponse> handleInvalidFormatException(InvalidFormatException ex) {
+//        if (ex.getTargetType().isEnum()) { // Vérifie si l'exception concerne un Enum
+//            String fieldName = ex.getPath().get(0).getFieldName();
+//            String invalidValue = ex.getValue().toString();
+//            String expectedValues = Arrays.stream(ex.getTargetType().getEnumConstants())
+//                    .map(Object::toString) // Convertit chaque valeur en String
+//                    .collect(Collectors.joining(", "));
+//
+//            String message = String.format(
+//                    "Valeur invalide pour le champ '%s': '%s'. Les valeurs acceptées sont : %s.",
+//                    fieldName, invalidValue, expectedValues);
+//
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body(new ErrorResponse("Invalid Enum Value", message));
+//        }
+//
+//        // Si ce n'est pas un Enum, renvoyer une erreur générique
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .body(new ErrorResponse("JSON Parse Error", ex.getMessage()));
+//    }
+
     // Default message for internal error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception ex) {
+        System.out.println(ex.getMessage());
+
         System.out.println(ex.getCause());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR) // 500 Internal Server Error
                 .body(new ErrorResponse("Internal Server Error", ex.getMessage()));
