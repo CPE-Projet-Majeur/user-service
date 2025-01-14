@@ -56,7 +56,7 @@ public class UserService {
     }
 
     public Optional<UserModel> getUserNoPwdByLogin(String login) {
-        Optional<UserModel> uOpt =userRepository.findByLogin(login);
+        Optional<UserModel> uOpt = userRepository.findByLogin(login);
         if( uOpt.isPresent()){
             UserModel u=uOpt.get();
             u.setPassword("*************");

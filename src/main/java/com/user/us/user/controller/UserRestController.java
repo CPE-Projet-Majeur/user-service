@@ -71,15 +71,29 @@ public class UserRestController {
     @RequestMapping(method=RequestMethod.GET,value="/user/login/{login}")
     private UserDTO getUserByLogin(@PathVariable String login) {
         Optional<UserModel> ruser;
-        ruser= userService.getUserNoPwdByLogin(login);
+        ruser = userService.getUserNoPwdByLogin(login);
         if(ruser.isPresent()) {
             return DTOMapper.fromUserModelToUserDTO(ruser.get());
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User login"+login+", not found",null);
     }
 
+//    @RequestMapping(method=RequestMethod.POST,value="/user")
+//    @Transactional
+//    public LoginResponse addUser(@RequestBody UserDTO user) {
+//        System.out.println(user);
+//        // TODO : Faire la connexion en meme temps
+//        UserDTO userSaved = userService.addUser(user);
+//
+//        final UserDetails userDetails = authService.loadUserByUsername(userSaved.getLogin());
+//        final String token = jwtTokenUtil.generateToken(userDetails);
+//
+//
+//        return (new LoginResponse(token, userSaved));
+//    }
+
     @RequestMapping(method=RequestMethod.POST,value="/user")
-    @Transactional
+    @Transactional // TODO : PROBLEMS
     public LoginResponse addUser(@RequestBody UserDTO user) {
         System.out.println(user);
         // TODO : Faire la connexion en meme temps
