@@ -21,4 +21,30 @@ public class ReflectionUtils {
             return null;
         }
     }
+
+    public static Object getPrivateFieldRecursively(Object object, String fieldName) {
+        Class<?> clazz = object.getClass();
+        while (clazz != null) {
+            try {
+                Field field = clazz.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                return field.get(object);
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass(); // Passe à la classe parente
+            } catch (IllegalAccessException e) {
+                System.err.println("Impossible d'accéder au champ " + fieldName + ": " + e.getMessage());
+                return null;
+            }
+        }
+        System.err.println("Le champ " + fieldName + " n'existe pas dans la hiérarchie de classes.");
+        return null;
+    }
+
+    public static Throwable getRootCause(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        return cause;
+    }
 }

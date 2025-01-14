@@ -79,16 +79,10 @@ public class UserService {
     @Transactional
     public UserDTO addUser(UserDTO user) {
         UserModel u = fromUDtoToUModel(user);
+        initializeNewUser(u);
+
         // Encodage du password
         u.setPassword(passwordEncoder.encode(u.getPassword()));
-        // needed to avoid detached entity passed to persist error
-        // Role
-//        List<Role> authorities = new ArrayList<>();
-//        user.getRoleList().forEach(roleName -> {
-//            Role role = roleRepository.findByRoleName(roleName)
-//                    .orElseGet(() -> roleRepository.save(new Role(roleName))); // Crée le rôle s'il n'existe pas
-//            authorities.add(role);
-//        });
 
         Role defaultRole = roleRepository.findByRoleName("ROLE_USER")
                 .orElseThrow(() -> new RoleNotFoundException("ROLE_USER"));
@@ -97,9 +91,7 @@ public class UserService {
         try {
             UserModel u_saved = userRepository.save(u);
             return DTOMapper.fromUserModelToUserDTO(u_saved);
-//            UserModel u_saved = userRepository.save(u); // Premier appel pour gérer l'entité
-//            UserModel uBd = userRepository.save(u_saved); // Deuxième appel pour éviter "detached entity" error
-//            return DTOMapper.fromUserModelToUserDTO(uBd);
+
         } catch (DataIntegrityViolationException e) {
             // Gérer l'erreur : le login existe déjà
             System.out.println("DataIntegrity violation");
@@ -114,6 +106,7 @@ public class UserService {
 
     @Transactional
     public UserDTO updateUser(UserDTO user) {
+        // TODO : warning not letting ppl set everything
         UserModel u = fromUDtoToUModel(user);
         // Encodage du pwd
         u.setPassword(passwordEncoder.encode(u.getPassword()));
@@ -206,6 +199,12 @@ public class UserService {
         response.put("rolesCreated", createdRoles);
 
         return response;
+    }
+
+    private void initializeNewUser(UserModel userModel) {
+        userModel.setAccount(100);
+        userModel.setWins(0);
+        userModel.setDefeats(0);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.user.us.user.errors;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.user.us.user.common.tools.ReflectionUtils;
 import com.user.us.user.model.ErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,6 +11,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import static com.fasterxml.jackson.databind.util.ClassUtil.getRootCause;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -37,25 +42,34 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleInvalidFormatException(HttpMessageNotReadableException ex) {
-//        String fieldName = ex.getPath().get(0).getFieldName(); // Nom du champ problématique
-//        String fieldName = "House"; // Nom du champ problématique
-//
-//        System.out.println("cause : "+ex.getCause());
-//        String invalidValue = ex.getCause(); // Valeur invalide
-        // Utiliser ReflectionUtils pour accéder aux champs privés
-        Object targetType = ReflectionUtils.getPrivateField(ex, "_targetType");
-        Object value = ReflectionUtils.getPrivateField(ex, "_value");
+        Throwable rootCause = getRootCause(ex);
 
-        String fieldName = targetType != null ? targetType.toString() : "null";
-        String invalidValue = value != null ? value.toString() : "null";
-        String expectedValues = "Slytherin, Gryffindor, Hufflepuff, Ravenclaw"; // Valeurs attendues
-        System.out.println("Fieldname : "+fieldName+"\nValue : "+ value);
+        if (rootCause instanceof InvalidFormatException) {
+            InvalidFormatException invalidFormatException = (InvalidFormatException) rootCause;
 
-        String message = String.format("Valeur invalide pour le champ '%s': '%s'. Les valeurs acceptées sont : %s.",
-                fieldName, invalidValue, expectedValues);
+            // Accéder aux champs privés (cause -> _value et _targetType) de InvalidFormatException
+            Object targetType = ReflectionUtils.getPrivateFieldRecursively(invalidFormatException, "_targetType");
+            Object value = ReflectionUtils.getPrivateFieldRecursively(invalidFormatException, "_value");
 
-        ErrorResponse errorResponse = new ErrorResponse("Invalid Value", message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            if (targetType instanceof Class && ((Class<?>) targetType).isEnum()) {
+                String fieldName = invalidFormatException.getPath().get(0).getFieldName();
+                String invalidValue = value != null ? value.toString() : "null";
+                String expectedValues = Arrays.stream(((Class<?>) targetType).getEnumConstants())
+                        .map(Object::toString)
+                        .collect(Collectors.joining(", "));
+
+                String message = String.format(
+                        "Valeur invalide pour le champ '%s': '%s'. Les valeurs acceptées sont : %s.",
+                        fieldName, invalidValue, expectedValues);
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ErrorResponse("Invalid Enum Value", message));
+            }
+        }
+        // Réponse générique
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("JSON Parse Error", ex.getMessage()));
+
     }
 
 //    // Gestion de l'exception InvalidFormatException

@@ -38,7 +38,8 @@ public class UserModel implements Serializable, UserDetails {
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "USER_ROLE",
             joinColumns = {@JoinColumn(name = "USER_ID")},
-            inverseJoinColumns = {@JoinColumn(name = "ROLE_ID")})
+            inverseJoinColumns = {@JoinColumn(name = "ROLE_ID")},
+            uniqueConstraints = {@UniqueConstraint(columnNames = {"USER_ID", "ROLE_ID"})})
     private List<Role> roleList;
 
     public List<Role> getRoleList() {
@@ -91,14 +92,9 @@ public class UserModel implements Serializable, UserDetails {
         this.firstName =user.getFirstName();
         this.email=user.getEmail();
         this.house = String.valueOf(user.getHouse());
-//        this.defeats = user.getDefeats();
-//        this.wins = user.getWins();
-//        this.account = user.getAccount();
-        // Valeurs par défauts pour la création
-        this.defeats = 0;
-        this.wins = 0;
-        this.account = 100;
-
+        this.defeats = user.getDefeats();
+        this.wins = user.getWins();
+        this.account = user.getAccount();
     }
 
 	public Integer getId() {

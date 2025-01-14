@@ -31,9 +31,17 @@ public class JwtAuthRestController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-        final UserDetails userDetails = authService.loadUserByUsername(authenticationRequest.getUsername());
+//        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+//        final UserDetails userDetails = authService.loadUserByUsername(authenticationRequest.getUsername());
+//        final String token = jwtTokenUtil.generateToken(userDetails);
+//        UserDTO user = new UserDTO(userService.getUserByLogin(userDetails.getUsername())
+//                .orElseThrow(() -> new RuntimeException("User not found in database")));
+//        // réponse avec le token et l'utilisateur
+//        return ResponseEntity.ok(new LoginResponse(token, user));
+        authenticate(authenticationRequest.getLogin(), authenticationRequest.getPassword());
+        final UserDetails userDetails = authService.loadUserByUsername(authenticationRequest.getLogin());
         final String token = jwtTokenUtil.generateToken(userDetails);
+        // It does the login/username match alone 
         UserDTO user = new UserDTO(userService.getUserByLogin(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found in database")));
         // réponse avec le token et l'utilisateur

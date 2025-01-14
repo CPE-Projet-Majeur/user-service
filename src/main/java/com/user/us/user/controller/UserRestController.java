@@ -1,13 +1,18 @@
 package com.user.us.user.controller;
 
 import com.user.us.user.common.tools.DTOMapper;
+import com.user.us.user.common.tools.JwtTokenUtil;
+import com.user.us.user.model.LoginResponse;
 import com.user.us.user.model.RoleDTO;
 import com.user.us.user.model.UserDTO;
 import com.user.us.user.model.UserModel;
+import com.user.us.user.service.AuthService;
 import com.user.us.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +33,12 @@ public class UserRestController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    AuthService authService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(method=RequestMethod.GET,value="/users")
     private List<UserDTO> getAllUsers() {
@@ -68,10 +79,17 @@ public class UserRestController {
     }
 
     @RequestMapping(method=RequestMethod.POST,value="/user")
-    public UserDTO addUser(@RequestBody UserDTO user) {
+    @Transactional
+    public LoginResponse addUser(@RequestBody UserDTO user) {
         System.out.println(user);
         // TODO : Faire la connexion en meme temps
-        return userService.addUser(user);
+        UserDTO userSaved = userService.addUser(user);
+
+        final UserDetails userDetails = authService.loadUserByUsername(userSaved.getLogin());
+        final String token = jwtTokenUtil.generateToken(userDetails);
+
+
+        return (new LoginResponse(token, userSaved));
     }
 
     @RequestMapping(method=RequestMethod.PUT,value="/user/{id}")
