@@ -3,6 +3,8 @@ package com.user.us.user.model;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.user.us.user.common.tools.DTOMapper.fromListRoleToListString;
+
 public class UserDTO {
     private Integer id;
     private String login;
@@ -33,9 +35,7 @@ public class UserDTO {
         this.defeats = user.getDefeats();
         this.wins = user.getWins();
         this.account = user.getAccount();
-        this.roleList = user.getRoleList().stream()
-                .map(Role::getRoleName)
-                .collect(Collectors.toList());
+        this.roleList = fromListRoleToListString(user.getRoleList());
     }
 
     public List<String> getRoleList() {

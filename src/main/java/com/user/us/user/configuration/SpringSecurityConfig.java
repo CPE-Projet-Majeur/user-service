@@ -55,13 +55,14 @@ public class SpringSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth-> auth
-                                .requestMatchers("/heroes").permitAll()
+                                .requestMatchers("/heroes").authenticated()
+                                .requestMatchers("/heroes2").hasAuthority("ROLE_USER")
                                 .requestMatchers("/login").permitAll() // Se log
-                                .requestMatchers("/user").permitAll() // Ajouter un user (se créer soit même)
-                                .requestMatchers(HttpMethod.GET, "/user/**").permitAll() // Get un user specific
-                                .requestMatchers(HttpMethod.PUT, "/user/**").hasAuthority("ROLE_ADMIN") // update un user specific
-                                .requestMatchers(HttpMethod.PUT, "/user/{id}/role").hasAuthority("ROLE_ADMIN") // Ajouter un role à un user
-                                .requestMatchers(HttpMethod.PUT, "/user/role").hasAuthority("ROLE_ADMIN") // Ajouter un role à un user
+                                .requestMatchers(HttpMethod.POST, "/users").permitAll() // Ajouter un user (se créer soit même)
+                                .requestMatchers(HttpMethod.GET, "/users/**").permitAll() // Get un user specific
+                                .requestMatchers(HttpMethod.PUT, "/users/**").authenticated() // update un user specific
+                                .requestMatchers(HttpMethod.PUT, "/admin/user/{id}/role").hasAuthority("ROLE_ADMIN") // Ajouter un role à un user
+                                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                                 .requestMatchers("/users").permitAll() // Get les users
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

@@ -77,7 +77,7 @@ public class UserModel implements Serializable, UserDetails {
         this.firstName ="firstname_default";
         this.email="email_default";
         Role userRole = new Role("USER_ROLE");
-        this.addRoleToList(userRole);
+        this.roleList = List.of(userRole);
         this.defeats = 0;
         this.wins = 0;
         this.account = 100;
@@ -92,9 +92,18 @@ public class UserModel implements Serializable, UserDetails {
         this.firstName =user.getFirstName();
         this.email=user.getEmail();
         this.house = String.valueOf(user.getHouse());
-        this.defeats = user.getDefeats();
-        this.wins = user.getWins();
-        this.account = user.getAccount();
+//        this.defeats = user.getDefeats();
+//        this.wins = user.getWins();
+//        this.account = user.getAccount();
+//        this.roleList = user.getRoleList().stream()
+//                .map(roleName -> new Role(roleName)) // Convertit chaque String en objet Role
+//                .collect(Collectors.toList());
+
+        // Valeurs par défaut pour ne pas avoir d'abus (si besoin utiliser les setters explicitement dans la méthode du service)
+        this.roleList = new ArrayList<>();
+        this.defeats = 0;
+        this.wins = 0;
+        this.account = 100;
     }
 
 	public Integer getId() {

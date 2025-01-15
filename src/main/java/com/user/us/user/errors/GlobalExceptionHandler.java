@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.util.ClassUtil.getRootCause;
@@ -69,7 +71,17 @@ public class GlobalExceptionHandler {
         // Réponse générique
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("JSON Parse Error", ex.getMessage()));
+    }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<?> handleInvalidTokenException(InvalidTokenException ex) {
+        // Créer une réponse personnalisée
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "Unauthorized");
+        response.put("message", ex.getMessage());
+        response.put("status", HttpStatus.UNAUTHORIZED.value());
+
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
 //    // Gestion de l'exception InvalidFormatException
