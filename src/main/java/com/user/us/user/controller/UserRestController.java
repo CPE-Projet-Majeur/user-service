@@ -79,7 +79,7 @@ public class UserRestController {
     }
 
 //    @RequestMapping(method=RequestMethod.POST,value="/user")
-//    @Transactional
+//    @Transactional // TODO : PROBLEMS
 //    public LoginResponse addUser(@RequestBody UserDTO user) {
 //        System.out.println(user);
 //        // TODO : Faire la connexion en meme temps
@@ -92,9 +92,9 @@ public class UserRestController {
 //        return (new LoginResponse(token, userSaved));
 //    }
 
+    //TODO : voir si transactional sur une fonction qui fait le add et le token ou laisser comme ça 
     @RequestMapping(method=RequestMethod.POST,value="/user")
-    @Transactional // TODO : PROBLEMS
-    public LoginResponse addUser(@RequestBody UserDTO user) {
+    public UserDTO addUser(@RequestBody UserDTO user) {
         System.out.println(user);
         // TODO : Faire la connexion en meme temps
         UserDTO userSaved = userService.addUser(user);
@@ -103,7 +103,7 @@ public class UserRestController {
         final String token = jwtTokenUtil.generateToken(userDetails);
 
 
-        return (new LoginResponse(token, userSaved));
+        return userSaved;
     }
 
     @RequestMapping(method=RequestMethod.PUT,value="/user/{id}")
