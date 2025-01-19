@@ -93,8 +93,6 @@ public class UserService {
     public UserDTO addUserAsAdmin(UserDTO user) {
         UserModel u = fromUDtoToUModel(user);
         setAttributesUser(u,user);
-        // Encodage du password
-        u.setPassword(passwordEncoder.encode(u.getPassword()));
 
         try {
             return this.addUser(u);
@@ -114,8 +112,6 @@ public class UserService {
     public LoginResponse addUserGiveToken(UserDTO user) {
         UserModel u = fromUDtoToUModel(user);
         initializeNewUser(u);
-        // Encodage du password
-        u.setPassword(passwordEncoder.encode(u.getPassword()));
         try {
             UserDTO uSaved = this.addUser(u);
             final UserDetails userDetails = authService.loadUserByUsername(uSaved.getLogin());
