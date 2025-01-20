@@ -57,13 +57,12 @@ public class SpringSecurityConfig {
                         auth-> auth
                                 .requestMatchers("/heroes").authenticated()
                                 .requestMatchers("/heroes2").hasAuthority("ROLE_USER")
+                                .requestMatchers("/users").permitAll() // Get les users
                                 .requestMatchers("/login").permitAll() // Se log
-                                .requestMatchers(HttpMethod.POST, "/users").permitAll() // Ajouter un user (se créer soit même)
                                 .requestMatchers(HttpMethod.GET, "/users/**").permitAll() // Get un user specific
                                 .requestMatchers(HttpMethod.PUT, "/users/**").authenticated() // update un user specific
-                                .requestMatchers(HttpMethod.PUT, "/admin/user/{id}/role").hasAuthority("ROLE_ADMIN") // Ajouter un role à un user
                                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers("/users").permitAll() // Get les users
+                                .requestMatchers(HttpMethod.DELETE,"/users/{id}").authenticated()
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 

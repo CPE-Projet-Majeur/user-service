@@ -44,6 +44,7 @@ public class UserRestController {
         return uDTOList;
     }
 
+    // TODO : delete heroes
     @RequestMapping(method=RequestMethod.GET,value="/heroes")
     private List<UserDTO> getAllheroes() {
         List<UserDTO> uDTOList=new ArrayList<UserDTO>();
@@ -92,7 +93,7 @@ public class UserRestController {
     }
 
     @RequestMapping(method=RequestMethod.POST,value="/users")
-    public LoginResponse addUserGiveToken(@RequestBody UserDTO user) {
+    public ResponseEntity<Map<String, String>> addUserGiveToken(@RequestBody UserDTO user) {
         System.out.println(user);
         return userService.addUserGiveToken(user); // Token et user envoyé
     }
@@ -115,11 +116,11 @@ public class UserRestController {
     }
 
     @RequestMapping(method=RequestMethod.DELETE,value="/users/{id}")
-    public void deleteUser(@PathVariable String id) {
-        userService.deleteUser(Integer.valueOf(id));
+    public void deleteUser(@RequestHeader("Authorization") String token, @PathVariable String id) {
+        userService.deleteUser(Integer.valueOf(id), token);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/users/roles")
+    @RequestMapping(method = RequestMethod.POST, value = "/admin/roles")
     public ResponseEntity<Map<String, List<String>>> addRole(@RequestBody RoleDTO roles) {
         Map<String, List<String>> result = userService.addRoles(roles);
 

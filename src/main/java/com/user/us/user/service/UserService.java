@@ -9,15 +9,13 @@ import com.user.us.user.errors.RoleNotFoundException;
 import com.user.us.user.model.*;
 import com.user.us.user.repository.RoleRepository;
 import com.user.us.user.repository.UserRepository;
-import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -111,7 +109,7 @@ public class UserService {
     }
 
     @Transactional
-    public LoginResponse addUserGiveToken(UserDTO user) {
+    public ResponseEntity<Map<String, String>> addUserGiveToken(UserDTO user) {
         UserModel u = fromUDtoToUModel(user);
         initializeNewUser(u);
         // Encodage du password
@@ -120,8 +118,9 @@ public class UserService {
             UserDTO uSaved = this.addUser(u);
             final UserDetails userDetails = authService.loadUserByUsername(uSaved.getLogin());
             final String token = jwtTokenUtil.generateToken(userDetails);
-            uSaved.setPassword("*************");
-            return new LoginResponse(token, uSaved);
+            Map<String, String> response = new HashMap<>();
+            response.put("token", token);
+            return ResponseEntity.ok(response);
 
         } catch (DataIntegrityViolationException e) {
             // Gérer l'erreur : le login existe déjà
@@ -145,7 +144,6 @@ public class UserService {
 
     @Transactional
     public UserDTO updateUser(UserDTO user, String token) {
-        // TODO : warning not letting ppl set everything
         UserModel u = fromUDtoToUModel(user);
         // Encodage du pwd
         u.setPassword(passwordEncoder.encode(u.getPassword()));
@@ -157,6 +155,7 @@ public class UserService {
         if (token != null && token.startsWith("Bearer ")) {
             jwtToken = token.substring(7);
         } else {
+            //Todo : error
 //            logger.warn("JWT Token does not begin with Bearer String");
         }
 
@@ -249,11 +248,39 @@ public class UserService {
         return DTOMapper.fromUserModelToUserDTO(currentUser);
     }
 
-    public void deleteUser(Integer id) {
+    public void deleteUser(Integer id, String token) {
+        // Todo : authentication
+        UserModel userFromId = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String loginFromId = userFromId.getLogin();
+
+        UserDetails userDetails = authService.loadUserByUsername(loginFromId);
+        String jwtToken = null;
+        // try catch redundant with filter
+        if (token != null && token.startsWith("Bearer ")) {
+            jwtToken = token.substring(7);
+        } else {
+            //Todo : error
+//            logger.warn("JWT Token does not begin with Bearer String");
+        }
+
+        if (!jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+            throw new InvalidTokenException("Le token JWT est invalide ou a expiré.");
+        }else {
+            String login = jwtTokenUtil.getUsernameFromToken(jwtToken);
+            UserModel userFromToken = userRepository.findByLogin(login)
+                    .orElseThrow(() -> new UsernameNotFoundException("User in token not found"));
+
+            // Vérifier si l'utilisateur a le rôle "ROLE_ADMIN"
+            if (!userFromToken.getRoleListString().contains("ROLE_ADMIN")) {
+                throw new AccessDeniedException("You can't update a user that is not yourself and you do not have the required role to update other profiles: ROLE_ADMIN");
+            }
+
+            // Si l'utilisateur a le rôle, poursuivre l'exécution
+            System.out.println("L'utilisateur a le rôle ROLE_ADMIN.");
+        }
+
         userRepository.deleteById(id);
-    }
-    public void deleteUser(String login) {
-        userRepository.deleteByLogin(login);
     }
 
     private UserModel fromUDtoToUModel(UserDTO user) {
