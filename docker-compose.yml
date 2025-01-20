@@ -23,12 +23,6 @@ services:
     ports:
       - "8083:8083"
     environment:
-      # DB_HOST: db
-      # DB_PORT: 5432
-      # DB_NAME: userdbproject
-      # DB_USERNAME: myuser
-      # DB_PASSWORD: mypass
-      # SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/userdbproject
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/userdbproject
       SPRING_DATASOURCE_USERNAME: myuser
       SPRING_DATASOURCE_PASSWORD: mypass
