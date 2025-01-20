@@ -2,10 +2,7 @@ package com.user.us.user.controller;
 
 import com.user.us.user.common.tools.DTOMapper;
 import com.user.us.user.common.tools.JwtTokenUtil;
-import com.user.us.user.model.LoginResponse;
-import com.user.us.user.model.RoleDTO;
-import com.user.us.user.model.UserDTO;
-import com.user.us.user.model.UserModel;
+import com.user.us.user.model.*;
 import com.user.us.user.service.AuthService;
 import com.user.us.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +90,7 @@ public class UserRestController {
     }
 
     @RequestMapping(method=RequestMethod.POST,value="/users")
-    public ResponseEntity<Map<String, String>> addUserGiveToken(@RequestBody UserDTO user) {
+    public JwtResponse addUserGiveToken(@RequestBody UserDTO user) {
         System.out.println(user);
         return userService.addUserGiveToken(user); // Token et user envoyé
     }

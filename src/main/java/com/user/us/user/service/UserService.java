@@ -107,16 +107,14 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<Map<String, String>> addUserGiveToken(UserDTO user) {
+    public JwtResponse addUserGiveToken(UserDTO user) {
         UserModel u = fromUDtoToUModel(user);
         initializeNewUser(u);
         try {
             UserDTO uSaved = this.addUser(u);
             final UserDetails userDetails = authService.loadUserByUsername(uSaved.getLogin());
             final String token = jwtTokenUtil.generateToken(userDetails);
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            return ResponseEntity.ok(response);
+            return new JwtResponse(token);
 
         } catch (DataIntegrityViolationException e) {
             // Gérer l'erreur : le login existe déjà
@@ -261,8 +259,6 @@ public class UserService {
         }
 
         if (!jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-            throw new InvalidTokenException("Le token JWT est invalide ou a expiré.");
-        }else {
             String login = jwtTokenUtil.getUsernameFromToken(jwtToken);
             UserModel userFromToken = userRepository.findByLogin(login)
                     .orElseThrow(() -> new UsernameNotFoundException("User in token not found"));
@@ -275,7 +271,6 @@ public class UserService {
             // Si l'utilisateur a le rôle, poursuivre l'exécution
             System.out.println("L'utilisateur a le rôle ROLE_ADMIN.");
         }
-
         userRepository.deleteById(id);
     }
 
